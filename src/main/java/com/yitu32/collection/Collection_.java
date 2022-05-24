@@ -59,13 +59,18 @@ public class Collection_ {
             String s = list01.get(i);
             System.out.println(s);
         }
-        // 迭代器
+        // 迭代器,用于遍历Collection
+        // 得到一个迭代器
         Iterator<String> iterator = list01.iterator();
+        // 判断是否有下一个元素
         while (iterator.hasNext()) {
+            // 如果有下一个元素，才可以调用next()方法
             String next = iterator.next();
             System.out.println(next);
+            // 可以根据条件删除元素，注意此时调用的是迭代器的remove()方法
+            // iterator.remove();
         }
-        // 增强for循环
+        // 增强for循环又叫foreach循环，底层调用的是Iterator，可以用来遍历集合或者数组
         for (String s : list01) {
             System.out.println(s);
         }
@@ -86,25 +91,33 @@ public class Collection_ {
             System.out.println(s);
         }
         List<String> list02 = new ArrayList<>();
+        list02.add("汉");
         list02.add("三国");
         list02.add("晋");
         list02.add("五胡十六国");
         List<String> list03 = new ArrayList<>();
         list03.add("商");
-        list03.add("周");
+        list03.add("汉");
+        // 把list02全部添加到list01中，包含重复的
         list01.addAll(list02);
         System.out.println("list01.addAll(list02)之后");
         for (String s : list01) {
             System.out.println(s);
         }
-        System.out.println(list01.containsAll(list03));
-        list01.removeAll(list03);
+        System.out.println("list01.containsAll(list03)=" + list01.containsAll(list03));
+        // list01作为基准，没有在list03中的，都移除，最后取的是两个集合都包含的，
+        // 如果list01中重复元素刚好符合这个规律，则都会保留
+        list01.retainAll(list03);
+        System.out.println("list01.retainAll(list03)之后");
         for (String s : list01) {
             System.out.println(s);
         }
-        System.out.println(list01.retainAll(list03));
-
-
+        // 删除同时存在于list01和list03中的元素，如果有重复的会多次删除
+        list01.removeAll(list03);
+        System.out.println("list01.removeAll(list03)之后");
+        for (String s : list01) {
+            System.out.println(s);
+        }
     }
 
 }
