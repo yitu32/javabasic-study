@@ -158,11 +158,11 @@ public class Date_ {
         LocalDateTime localDateTime02 = LocalDateTime.of(2022, 03, 15, 05, 30, 20);
         LocalDateTime localDateTime03 = LocalDateTime.of(2022, 03, 14, 05, 30, 20);
         // isBefore方法，判断localDateTime01是否在localDateTime02之前
-        System.out.println("localDateTime01.isBefore(localDateTime02):"+localDateTime01.isBefore(localDateTime02));
+        System.out.println("localDateTime01.isBefore(localDateTime02):" + localDateTime01.isBefore(localDateTime02));
         // isAfter方法，判断localDateTime02是否在localDateTime01之后
-        System.out.println("localDateTime02.isAfter(localDateTime02):"+localDateTime02.isAfter(localDateTime01));
+        System.out.println("localDateTime02.isAfter(localDateTime02):" + localDateTime02.isAfter(localDateTime01));
         // isEqual方法，判断两时间是否为同一时间（非同一对象）
-        System.out.println("localDateTime01.isEqual(localDateTime03):"+localDateTime01.isEqual(localDateTime03));
+        System.out.println("localDateTime01.isEqual(localDateTime03):" + localDateTime01.isEqual(localDateTime03));
     }
 
     @Test

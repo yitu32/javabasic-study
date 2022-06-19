@@ -8,7 +8,7 @@ import java.util.List;
 
 public class Collection_ {
     /**
-     * Collection 常用方法
+     * Collection 常用方法，暂以ArrayList作为实现类来阐述
      */
     @Test
     public void test01() {
@@ -50,12 +50,11 @@ public class Collection_ {
         list01.add("夏");
         list01.add("商");
         list01.add("周");
+        list01.add("秦");
         list01.add("汉");
-        // 可以在指定位置插入
-        list01.add(3, "秦");
         // 普通for循环
         for (int i = 0; i < list01.size(); i++) {
-            // 得到某一个索引位置的元素
+            // 得到某一个索引位置的元素(List中的方法)
             String s = list01.get(i);
             System.out.println(s);
         }
@@ -73,6 +72,12 @@ public class Collection_ {
         // 增强for循环又叫foreach循环，底层调用的是Iterator，可以用来遍历集合或者数组
         for (String s : list01) {
             System.out.println(s);
+        }
+        // 集合可以转数组，数组可以用foreach遍历
+        System.out.println("===集合可以转数组===");
+        Object[] objects = list01.toArray();
+        for (Object object : objects) {
+            System.out.println(object);
         }
     }
 
@@ -112,12 +117,14 @@ public class Collection_ {
         for (String s : list01) {
             System.out.println(s);
         }
-        // 删除同时存在于list01和list03中的元素，如果有重复的会多次删除
+        // 从list01中删除同时存在于list01和list03中的元素，如果有重复的会多次删除
         list01.removeAll(list03);
         System.out.println("list01.removeAll(list03)之后");
         for (String s : list01) {
             System.out.println(s);
         }
+        // 可以判断两集合是否相等，比较的是两个集合中的元素是否相等
+        System.out.println("list01.equals(list02)=" + list01.equals(list02));
     }
 
 }
