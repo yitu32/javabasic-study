@@ -1,6 +1,11 @@
 package com.yitu32.entity;
 
-public class Animal<T, K, V> {
+import java.io.Serializable;
+
+public class Animal<T, K, V> implements Serializable {
+
+    private static final long serialVersionUID = 775365956450828333L;
+
     private T faith;
     private K name;
     private V age;
