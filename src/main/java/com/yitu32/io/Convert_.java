@@ -39,4 +39,27 @@ public class Convert_ {
 
     }
 
+    @Test
+    public void test02() {
+        String utf8FilePath = "E:\\test\\test01.txt";
+        OutputStreamWriter outputStreamWriter = null;
+        try {
+            // 如果不指定，默认当前项目编码
+            outputStreamWriter = new OutputStreamWriter(new FileOutputStream(utf8FilePath,true),"gbk");
+            outputStreamWriter.write("你猜有乱码吗");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (outputStreamWriter != null) {
+                try {
+                    outputStreamWriter.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
 }

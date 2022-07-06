@@ -150,4 +150,39 @@ public class FileStream_ {
         }
     }
 
+
+    @Test
+    public void test05() {
+        String path = "e:\\test\\test08.txt";
+        FileOutputStream fileOutputStream = null;
+        try {
+            // 也可以传File
+            // fileOutputStream = new FileOutputStream(new File(path));
+            // 第二个参数表示是否追加内容，true表示追加，如果写，默认为false，表示每次都重新写入
+            // fileOutputStream = new FileOutputStream(path, true);
+            fileOutputStream = new FileOutputStream(path);
+            // 写一个字节
+            fileOutputStream.write('A');
+            fileOutputStream.write('\n');
+            // 写入字节数组
+            fileOutputStream.write("hello world".getBytes());
+            fileOutputStream.write("\n".getBytes());
+            // 写入字节数组，指定起止位置
+            fileOutputStream.write("hello world".getBytes(), 0, 5);
+            fileOutputStream.write('\n');
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fileOutputStream != null) {
+                try {
+                    fileOutputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
 }
