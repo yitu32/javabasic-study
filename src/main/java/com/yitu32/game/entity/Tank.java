@@ -1,75 +1,78 @@
 package com.yitu32.game.entity;
 
-public class Tank {
-    /**
-     * 坦克的横坐标
-     */
-    private int x;
-    /**
-     * 坦克的纵坐标
-     */
-    private int y;
+import java.util.List;
+import java.util.Vector;
 
-    private Direct direct;
-
-    private int speed = 1;
+public class Tank extends Feature {
 
 
+    private List<Bullet> bullets;
+
+    public List<Bullet> getBullets() {
+        return bullets;
+    }
+
+    public void setBullets(List<Bullet> bullets) {
+        this.bullets = bullets;
+    }
+
+    public Tank() {
+    }
 
     public Tank(int x, int y) {
-        this.x = x;
-        this.y = y;
+        this.setX(x);
+        this.setY(y);
     }
 
-    public int getX() {
-        return x;
+    /**
+     * 得到当前坦克对象的炮筒位置，即子弹发射初始位置
+     *
+     * @return
+     */
+    public int[] getBulletStart() {
+        int[] ints = new int[2];
+        int x, y;
+        switch (getDirect()) {
+            case up:
+                x = this.getX() + 20;
+                y = this.getY();
+                break;
+            case down:
+                x = this.getX() + 20;
+                y = this.getY() + 60;
+                break;
+            case left:
+                x = this.getX();
+                y = this.getY() + 20;
+                break;
+            case right:
+                x = this.getX() + 60;
+                y = this.getY() + 20;
+                break;
+            default:
+                System.out.println("what are you doing?");
+                x = 0;
+                y = 0;
+                break;
+        }
+        ints[0] = x;
+        ints[1] = y;
+        return ints;
     }
 
-    public void setX(int x) {
-        this.x = x;
+    /**
+     * 发送子弹
+     */
+    public void shoot() {
+        Bullet bullet = new Bullet(this);
+        List<Bullet> bullets = this.getBullets();
+        if (bullets == null) {
+            bullets = new Vector<>();
+            this.setBullets(bullets);
+        }
+        bullets.add(bullet);
+        // 放入一个线程中
+        new Thread(bullet).start();
     }
 
-    public int getY() {
-        return y;
-    }
-
-    public void setY(int y) {
-        this.y = y;
-    }
-
-    public Direct getDirect() {
-        return direct;
-    }
-
-    public void setDirect(Direct direct) {
-        this.direct = direct;
-    }
-
-    public int getSpeed() {
-        return speed;
-    }
-
-    public void setSpeed(int speed) {
-        this.speed = speed;
-    }
-
-    public void moveUp(){
-        y -= speed;
-    }
-
-    public void moveDown(){
-        y += speed;
-    }
-
-    public void moveLeft(){
-        x -= speed;
-    }
-
-    public void moveRight(){
-        x += speed;
-    }
-
-    public enum Direct{
-        up,down,left,right
-    }
 }

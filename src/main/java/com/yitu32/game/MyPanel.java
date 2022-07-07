@@ -1,8 +1,11 @@
 package com.yitu32.game;
 
+import com.yitu32.game.entity.Bullet;
 import com.yitu32.game.entity.Enemy;
 import com.yitu32.game.entity.Hero;
 import com.yitu32.game.entity.Tank;
+import com.yitu32.game.enums.Direct;
+import com.yitu32.game.enums.TankType;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,9 +13,15 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.TimeUnit;
 
-public class MyPanel extends JPanel implements KeyListener {
+/**
+ * 画板实现了监听器
+ */
+public class MyPanel extends JPanel implements KeyListener, Runnable {
+    // 我们的坦克
     Hero hero = null;
+    // 敌人的坦克
     List<Enemy> enemies = new Vector();
     int enemySize = 3;
 
@@ -20,29 +29,35 @@ public class MyPanel extends JPanel implements KeyListener {
         // 初始化自己的坦克
         hero = new Hero(100, 100);
         // 向上
-        hero.setDirect(Tank.Direct.up);
+        hero.setDirect(Direct.up);
+        hero.setType(TankType.good);
         // 初始化敌人的坦克
         for (int i = 0; i < enemySize; i++) {
             Enemy enemy = new Enemy(100 * (i + 1), 0);
             // 向下
-            enemy.setDirect(Tank.Direct.down);
+            enemy.setDirect(Direct.down);
+            enemy.setType(TankType.bad);
             enemies.add(enemy);
+            new Thread(enemy).start();
         }
     }
 
+    // 重画也会调用到这个方法，所以，这个方法里面就是当前要画的所有东西
     @Override
     public void paint(Graphics g) {
         super.paint(g);
         // 填充矩形
         g.fillRect(0, 0, 1000, 750);
-        // 画出坦克
-        drawTank(hero.getX(), hero.getY(), g, hero.getDirect(), 1);
-
+        // 画出我们的坦克
+        drawTank(hero.getX(), hero.getY(), g, hero.getDirect(), hero.getType());
+        // 画出别人的坦克
         for (int i = 0; i < enemies.size(); i++) {
             Enemy enemy = enemies.get(i);
-            drawTank(enemy.getX(), enemy.getY(), g, enemy.getDirect(), 0);
+            drawTank(enemy.getX(), enemy.getY(), g, enemy.getDirect(), enemy.getType());
+            drawBullets(enemy, g);
         }
-
+        // 有子弹对象就要画出子弹对象
+        drawBullets(hero, g);
     }
 
     /**
@@ -54,17 +69,18 @@ public class MyPanel extends JPanel implements KeyListener {
      * @param direct 坦克的方向
      * @param type   坦克类型
      */
-    private void drawTank(int x, int y, Graphics g, Tank.Direct direct, int type) {
+    private void drawTank(int x, int y, Graphics g, Direct direct, TankType type) {
         switch (type) {
             // 我们的坦克
-            case 0:
+            case good:
                 g.setColor(Color.CYAN);
                 break;
             // 敌人的坦克
-            case 1:
+            case bad:
                 g.setColor(Color.YELLOW);
                 break;
         }
+        // 上下左右有不同画法
         switch (direct) {
             case up:
                 g.fill3DRect(x, y, 10, 60, false);
@@ -100,6 +116,25 @@ public class MyPanel extends JPanel implements KeyListener {
 
     }
 
+
+    private void drawBullets(Tank t, Graphics g) {
+        List<Bullet> bullets = t.getBullets();
+        if (bullets != null && bullets.size() > 0) {
+            for (int i = 0; i < bullets.size(); i++) {
+                Bullet bullet = bullets.get(i);
+                if (bullet != null && bullet.isAlive()) {
+                    drawBullet(bullet.getX(), bullet.getY(), g, bullet.getDirect());
+                }
+            }
+        }
+    }
+
+    // 画出子弹
+    private void drawBullet(int x, int y, Graphics g, Direct direct) {
+        g.setColor(Color.RED);
+        g.draw3DRect(x, y, 1, 1, false);
+    }
+
     @Override
     public void keyTyped(KeyEvent e) {
 
@@ -109,17 +144,22 @@ public class MyPanel extends JPanel implements KeyListener {
     public void keyPressed(KeyEvent e) {
         char keyCode = (char) e.getKeyCode();
         if (keyCode == KeyEvent.VK_W) {
-            hero.setDirect(Tank.Direct.up);
+            hero.setDirect(Direct.up);
             hero.moveUp();
         } else if (keyCode == KeyEvent.VK_S) {
-            hero.setDirect(Tank.Direct.down);
+            hero.setDirect(Direct.down);
             hero.moveDown();
         } else if (keyCode == KeyEvent.VK_A) {
-            hero.setDirect(Tank.Direct.left);
+            hero.setDirect(Direct.left);
             hero.moveLeft();
         } else if (keyCode == KeyEvent.VK_D) {
-            hero.setDirect(Tank.Direct.right);
+            hero.setDirect(Direct.right);
             hero.moveRight();
+        }
+
+        // 发弹
+        if (keyCode == KeyEvent.VK_J) {
+            hero.shoot();
         }
 
         this.repaint();
@@ -129,5 +169,20 @@ public class MyPanel extends JPanel implements KeyListener {
     @Override
     public void keyReleased(KeyEvent e) {
 
+    }
+
+    /**
+     * 单独启一个线程来不停重画
+     */
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                TimeUnit.MILLISECONDS.sleep(50);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            this.repaint();
+        }
     }
 }
