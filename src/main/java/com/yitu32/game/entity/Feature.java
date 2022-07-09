@@ -3,6 +3,10 @@ package com.yitu32.game.entity;
 import com.yitu32.game.enums.Direct;
 import com.yitu32.game.enums.TankType;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+
 /**
  * @ClassName Feature
  * @Author yitu32
@@ -11,6 +15,9 @@ import com.yitu32.game.enums.TankType;
  * @Version 1.0
  */
 public class Feature {
+
+    public static ExecutorService bulletsThread = Executors.newCachedThreadPool();
+    public static ExecutorService tankThread = Executors.newFixedThreadPool(4);
 
     public Feature() {
     }

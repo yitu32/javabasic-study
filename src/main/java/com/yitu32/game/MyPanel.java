@@ -1,9 +1,6 @@
 package com.yitu32.game;
 
-import com.yitu32.game.entity.Bullet;
-import com.yitu32.game.entity.Enemy;
-import com.yitu32.game.entity.Hero;
-import com.yitu32.game.entity.Tank;
+import com.yitu32.game.entity.*;
 import com.yitu32.game.enums.Direct;
 import com.yitu32.game.enums.TankType;
 
@@ -38,7 +35,7 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
             enemy.setDirect(Direct.down);
             enemy.setType(TankType.bad);
             enemies.add(enemy);
-            new Thread(enemy).start();
+            Feature.tankThread.execute(enemy);
         }
     }
 

@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
  * @Date 2022/7
  * @Version 1.0
  */
-public class Bullet extends Tank implements Runnable {
+public class Bullet extends Feature implements Runnable {
 
     private boolean alive = true;
 
@@ -75,7 +75,7 @@ public class Bullet extends Tank implements Runnable {
                 e.printStackTrace();
             }
         }
-
+        System.out.println("线程销毁"+Thread.currentThread().getName());
 
     }
 }

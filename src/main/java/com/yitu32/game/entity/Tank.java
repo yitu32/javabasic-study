@@ -72,7 +72,7 @@ public class Tank extends Feature {
         }
         bullets.add(bullet);
         // 放入一个线程中
-        new Thread(bullet).start();
+        Feature.bulletsThread.execute(bullet);
     }
 
 }
