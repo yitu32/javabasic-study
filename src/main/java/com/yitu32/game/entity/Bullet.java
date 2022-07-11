@@ -13,9 +13,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class Bullet extends Feature implements Runnable {
 
-    private boolean alive = true;
-
-
     public Bullet() {
         super();
     }
@@ -29,18 +26,8 @@ public class Bullet extends Feature implements Runnable {
         this.setType(tank.getType());
     }
 
-    public boolean isAlive() {
-        return alive;
-    }
-
-    public void setAlive(boolean alive) {
-        this.alive = alive;
-    }
-
     @Override
     public void run() {
-        int x = getX();
-        int y = getY();
         for (; ; ) {
             // 判断往哪边移动
             switch (getDirect()) {
@@ -61,12 +48,12 @@ public class Bullet extends Feature implements Runnable {
                     break;
             }
             // 范围之内
-            if ((x > 0 && x < 1000) && (y > 0 && y < 750)) {
+            if ((getX() > 0 && getX() < 1000) && (getY() > 0 && getY() < 750)) {
                 // 重画
-                System.out.println("x=" + x + ",y=" + y);
+                // System.out.println("x=" + x + ",y=" + y);
                 // 范围之外
             } else {
-                alive = false;
+                setAlive(false);
                 break;
             }
             try {
@@ -75,7 +62,5 @@ public class Bullet extends Feature implements Runnable {
                 e.printStackTrace();
             }
         }
-        System.out.println("线程销毁"+Thread.currentThread().getName());
-
     }
 }

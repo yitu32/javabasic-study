@@ -23,50 +23,50 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
     int enemySize = 3;
 
     public MyPanel() {
-        // 初始化自己的坦克
-        hero = new Hero(100, 100);
-        // 向上
-        hero.setDirect(Direct.up);
-        hero.setType(TankType.good);
-        // 初始化敌人的坦克
+        // 构造方法中初始化坦克（此时并未画出来）
+        // 1.初始化自己的坦克
+        hero = new Hero(100, 100, Direct.up, TankType.good);
+        // 2.初始化敌人的坦克
         for (int i = 0; i < enemySize; i++) {
-            Enemy enemy = new Enemy(100 * (i + 1), 0);
-            // 向下
-            enemy.setDirect(Direct.down);
-            enemy.setType(TankType.bad);
+            Enemy enemy = new Enemy(100 * (i + 1), 0,Direct.down,TankType.bad);
             enemies.add(enemy);
             Feature.tankThread.execute(enemy);
         }
     }
 
-    // 重画也会调用到这个方法，所以，这个方法里面就是当前要画的所有东西
+    // 重画也会调用到这个方法，所以，这个方法里面就是==此时此刻==要画的所有东西
+    // 包括此刻的所有坦克和此刻的所有子弹
     @Override
     public void paint(Graphics g) {
         super.paint(g);
         // 填充矩形
         g.fillRect(0, 0, 1000, 750);
-        // 画出我们的坦克
-        drawTank(hero.getX(), hero.getY(), g, hero.getDirect(), hero.getType());
-        // 画出别人的坦克
-        for (int i = 0; i < enemies.size(); i++) {
-            Enemy enemy = enemies.get(i);
-            drawTank(enemy.getX(), enemy.getY(), g, enemy.getDirect(), enemy.getType());
-            drawBullets(enemy, g);
-        }
+        // 画出内存中我们的坦克
+        drawTank(hero.getX(), hero.getY(), g, hero);
         // 有子弹对象就要画出子弹对象
         drawBullets(hero, g);
+        // 画出内存中敌人的坦克
+        for (int i = 0; i < enemies.size(); i++) {
+            Enemy enemy = enemies.get(i);
+            drawTank(enemy.getX(), enemy.getY(), g, enemy);
+            drawBullets(enemy, g);
+        }
     }
 
     /**
      * 画出坦克
      *
-     * @param x      左上角x坐标
-     * @param y      左上角y坐标
-     * @param g      画笔
-     * @param direct 坦克的方向
-     * @param type   坦克类型
+     * @param x 左上角x坐标
+     * @param y 左上角y坐标
+     * @param g 画笔
      */
-    private void drawTank(int x, int y, Graphics g, Direct direct, TankType type) {
+    private void drawTank(int x, int y, Graphics g, Tank tank) {
+        // 存活才画出来
+        if (!tank.isAlive()) {
+            return;
+        }
+        Direct direct = tank.getDirect();
+        TankType type = tank.getType();
         switch (type) {
             // 我们的坦克
             case good:
@@ -113,23 +113,27 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
 
     }
 
-
+    /**
+     * 画出某一个坦克对应的所有子弹
+     * @param t
+     * @param g
+     */
     private void drawBullets(Tank t, Graphics g) {
         List<Bullet> bullets = t.getBullets();
         if (bullets != null && bullets.size() > 0) {
             for (int i = 0; i < bullets.size(); i++) {
                 Bullet bullet = bullets.get(i);
+                // 子弹存活才画
                 if (bullet != null && bullet.isAlive()) {
-                    drawBullet(bullet.getX(), bullet.getY(), g, bullet.getDirect());
+                    if (TankType.good == t.getType()) {
+                        g.setColor(Color.RED);
+                    } else if (TankType.bad == t.getType()) {
+                        g.setColor(Color.GREEN);
+                    }
+                    g.draw3DRect(bullet.getX(), bullet.getY(), 1, 1, false);
                 }
             }
         }
-    }
-
-    // 画出子弹
-    private void drawBullet(int x, int y, Graphics g, Direct direct) {
-        g.setColor(Color.RED);
-        g.draw3DRect(x, y, 1, 1, false);
     }
 
     @Override
@@ -137,30 +141,31 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
 
     }
 
+    /**
+     * 键盘按压事件
+     * @param e
+     */
     @Override
     public void keyPressed(KeyEvent e) {
         char keyCode = (char) e.getKeyCode();
-        if (keyCode == KeyEvent.VK_W) {
+        if (keyCode == KeyEvent.VK_W || keyCode == KeyEvent.VK_UP) {
             hero.setDirect(Direct.up);
             hero.moveUp();
-        } else if (keyCode == KeyEvent.VK_S) {
+        } else if (keyCode == KeyEvent.VK_S || keyCode == KeyEvent.VK_DOWN) {
             hero.setDirect(Direct.down);
             hero.moveDown();
-        } else if (keyCode == KeyEvent.VK_A) {
+        } else if (keyCode == KeyEvent.VK_A || keyCode == KeyEvent.VK_LEFT) {
             hero.setDirect(Direct.left);
             hero.moveLeft();
-        } else if (keyCode == KeyEvent.VK_D) {
+        } else if (keyCode == KeyEvent.VK_D || keyCode == KeyEvent.VK_RIGHT) {
             hero.setDirect(Direct.right);
             hero.moveRight();
         }
-
         // 发弹
         if (keyCode == KeyEvent.VK_J) {
             hero.shoot();
         }
-
         this.repaint();
-
     }
 
     @Override
@@ -179,7 +184,82 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            // 判断子弹是否打到坦克内部
+            hit();
             this.repaint();
         }
+    }
+
+    /**
+     * 判断是否有子弹打到内部
+     */
+    private void hit() {
+        Hero hero = this.getHero();
+        if (hero != null) {
+            // 判断每颗子弹是否在范围内
+            List<Bullet> bullets = hero.getBullets();
+            if (bullets == null || bullets.size() == 0) {
+                return;
+            }
+            for (Bullet bullet : bullets) {
+                if (bullet != null && bullet.isAlive()) {
+                    List<Enemy> enemies = this.getEnemies();
+                    for (Enemy enemy : enemies) {
+                        doHit(bullet, enemy);
+                    }
+                }
+            }
+        }
+    }
+
+    // 判断某一个子弹是否击中某一个坦克
+    private void doHit(Bullet bullet, Enemy tank) {
+        Direct direct = tank.getDirect();
+        switch (direct) {
+            case up:
+            case down:
+                if (bullet.getX() > tank.getX() && bullet.getX() < tank.getX() + 40
+                        && bullet.getY() > tank.getY() && bullet.getY() < tank.getY() + 60) {
+                    tank.setAlive(false);
+                    bullet.setAlive(false);
+                }
+                break;
+            case left:
+            case right:
+                if (bullet.getX() > tank.getX() && bullet.getX() < tank.getX() + 60
+                        && bullet.getY() > tank.getY() && bullet.getY() < tank.getY() + 40) {
+                    tank.setAlive(false);
+                    bullet.setAlive(false);
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+
+
+    public Hero getHero() {
+        return hero;
+    }
+
+    public void setHero(Hero hero) {
+        this.hero = hero;
+    }
+
+    public List<Enemy> getEnemies() {
+        return enemies;
+    }
+
+    public void setEnemies(List<Enemy> enemies) {
+        this.enemies = enemies;
+    }
+
+    public int getEnemySize() {
+        return enemySize;
+    }
+
+    public void setEnemySize(int enemySize) {
+        this.enemySize = enemySize;
     }
 }

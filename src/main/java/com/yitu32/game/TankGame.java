@@ -4,7 +4,7 @@ import javax.swing.*;
 
 // 画框
 public class TankGame extends JFrame {
-    MyPanel myPanel = null;
+    public static MyPanel myPanel = null;
 
     public static void main(String[] args) {
         new TankGame();
@@ -15,7 +15,7 @@ public class TankGame extends JFrame {
         myPanel = new MyPanel();
         // 画板加入画框
         this.add(myPanel);
-        // 单独为它启动一个线程来重画
+        // 单独为这个画板启动一个线程来重画
         new Thread(myPanel).start();
         // 画框设置大小
         this.setSize(1000, 750);

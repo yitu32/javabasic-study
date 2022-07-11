@@ -5,7 +5,6 @@ import com.yitu32.game.enums.TankType;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * @ClassName Feature
@@ -25,6 +24,13 @@ public class Feature {
     public Feature(int x, int y) {
         this.x = x;
         this.y = y;
+    }
+
+    public Feature(int x, int y, Direct direct, TankType type) {
+        this.x = x;
+        this.y = y;
+        this.direct = direct;
+        this.type = type;
     }
 
     /**
@@ -47,6 +53,8 @@ public class Feature {
      * 速度
      */
     public int speed = 1;
+
+    private boolean alive = true;
 
     public int getX() {
         return x;
@@ -102,5 +110,13 @@ public class Feature {
 
     public void moveRight() {
         x += speed;
+    }
+
+    public boolean isAlive() {
+        return alive;
+    }
+
+    public void setAlive(boolean alive) {
+        this.alive = alive;
     }
 }

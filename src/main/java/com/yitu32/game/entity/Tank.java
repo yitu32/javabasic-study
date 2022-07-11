@@ -1,5 +1,8 @@
 package com.yitu32.game.entity;
 
+import com.yitu32.game.enums.Direct;
+import com.yitu32.game.enums.TankType;
+
 import java.util.List;
 import java.util.Vector;
 
@@ -22,6 +25,10 @@ public class Tank extends Feature {
     public Tank(int x, int y) {
         this.setX(x);
         this.setY(y);
+    }
+
+    public Tank(int x, int y, Direct direct, TankType type) {
+        super(x, y, direct, type);
     }
 
     /**
@@ -61,7 +68,7 @@ public class Tank extends Feature {
     }
 
     /**
-     * 发送子弹
+     * 发射子弹
      */
     public void shoot() {
         Bullet bullet = new Bullet(this);

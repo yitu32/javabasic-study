@@ -1,6 +1,7 @@
 package com.yitu32.game.entity;
 
 import com.yitu32.game.enums.Direct;
+import com.yitu32.game.enums.TankType;
 
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -9,6 +10,10 @@ public class Enemy extends Tank implements Runnable {
 
     public Enemy(int x, int y) {
         super(x, y);
+    }
+
+    public Enemy(int x, int y, Direct direct, TankType type) {
+        super(x,y,direct,type);
     }
 
     @Override
@@ -20,7 +25,8 @@ public class Enemy extends Tank implements Runnable {
             int direct = random.nextInt(4);
 
             try {
-                move(direct, times);
+                boolean result = move(direct, times);
+                if (!result) break;
                 // 发射子弹
                 TimeUnit.MILLISECONDS.sleep(4000);
             } catch (InterruptedException e) {
@@ -30,7 +36,10 @@ public class Enemy extends Tank implements Runnable {
         }
     }
 
-    private void move(int direct, int times) throws InterruptedException {
+    private boolean move(int direct, int times) throws InterruptedException {
+        if (!this.isAlive()) {
+            return false;
+        }
         switch (direct) {
             case 0:
                 this.setDirect(Direct.up);
@@ -75,6 +84,6 @@ public class Enemy extends Tank implements Runnable {
             default:
                 break;
         }
-
+        return true;
     }
 }
