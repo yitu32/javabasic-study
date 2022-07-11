@@ -213,7 +213,8 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
     }
 
     // 判断某一个子弹是否击中某一个坦克
-    private void doHit(Bullet bullet, Enemy tank) {
+    private void doHit(Bullet bullet, Tank tank) {
+        if(!tank.isAlive()) return;
         Direct direct = tank.getDirect();
         switch (direct) {
             case up:
