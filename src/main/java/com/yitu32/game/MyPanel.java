@@ -21,6 +21,9 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
     // 敌人的坦克
     List<Enemy> enemies = new Vector();
     int enemySize = 3;
+    List<Bomb> bombs = new Vector<>();
+
+    Image image1, image2, image3;
 
     public MyPanel() {
         // 构造方法中初始化坦克（此时并未画出来）
@@ -28,10 +31,15 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
         hero = new Hero(100, 100, Direct.up, TankType.good);
         // 2.初始化敌人的坦克
         for (int i = 0; i < enemySize; i++) {
-            Enemy enemy = new Enemy(100 * (i + 1), 0,Direct.down,TankType.bad);
+            Enemy enemy = new Enemy(100 * (i + 1), 0, Direct.down, TankType.bad);
             enemies.add(enemy);
             Feature.tankThread.execute(enemy);
         }
+        // 初始化几张爆炸图片
+        image1 = Toolkit.getDefaultToolkit().getImage(MyPanel.class.getResource("/bomb_1.gif"));
+        image2 = Toolkit.getDefaultToolkit().getImage(MyPanel.class.getResource("/bomb_2.gif"));
+        image3 = Toolkit.getDefaultToolkit().getImage(MyPanel.class.getResource("/bomb_3.gif"));
+
     }
 
     // 重画也会调用到这个方法，所以，这个方法里面就是==此时此刻==要画的所有东西
@@ -50,6 +58,21 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
             Enemy enemy = enemies.get(i);
             drawTank(enemy.getX(), enemy.getY(), g, enemy);
             drawBullets(enemy, g);
+        }
+        // 如果有炸弹，就要画出来
+        for (int i = 0; i < bombs.size(); i++) {
+            Bomb bomb = bombs.get(i);
+            if (bomb.getLife() > 6) {
+                g.drawImage(image1, bomb.getX(), bomb.getY(), 60, 60, this);
+            } else if (bomb.getLife() > 3) {
+                g.drawImage(image2, bomb.getX(), bomb.getY(), 60, 60, this);
+            } else if (bomb.getLife() > 0) {
+                g.drawImage(image3, bomb.getX(), bomb.getY(), 60, 60, this);
+            }
+            bomb.lifeDown();
+            if (!bomb.isAlive()) {
+                bombs.remove(bomb);
+            }
         }
     }
 
@@ -214,7 +237,7 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
 
     // 判断某一个子弹是否击中某一个坦克
     private void doHit(Bullet bullet, Tank tank) {
-        if(!tank.isAlive()) return;
+        if (!tank.isAlive()) return;
         Direct direct = tank.getDirect();
         switch (direct) {
             case up:
@@ -223,6 +246,8 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
                         && bullet.getY() > tank.getY() && bullet.getY() < tank.getY() + 60) {
                     tank.setAlive(false);
                     bullet.setAlive(false);
+                    // 击中之后创造一个爆炸对象
+                    bombs.add(new Bomb(tank.getX(),tank.getY()));
                 }
                 break;
             case left:
@@ -231,13 +256,14 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
                         && bullet.getY() > tank.getY() && bullet.getY() < tank.getY() + 40) {
                     tank.setAlive(false);
                     bullet.setAlive(false);
+                    // 击中之后创造一个爆炸对象
+                    bombs.add(new Bomb(tank.getX(),tank.getY()));
                 }
                 break;
             default:
                 break;
         }
     }
-
 
 
     public Hero getHero() {
