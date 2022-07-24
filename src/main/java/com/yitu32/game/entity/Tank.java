@@ -1,5 +1,6 @@
 package com.yitu32.game.entity;
 
+import com.yitu32.game.MyPanel;
 import com.yitu32.game.enums.Direct;
 import com.yitu32.game.enums.TankType;
 
@@ -72,12 +73,18 @@ public class Tank extends Feature {
      */
     public void shoot() {
         Bullet bullet = new Bullet(this);
-        List<Bullet> bullets = this.getBullets();
-        if (bullets == null) {
-            bullets = new Vector<>();
-            this.setBullets(bullets);
+        TankType type = this.getType();
+        // 分为敌方和我方
+        if (TankType.bad == type) {
+            MyPanel.enemyBullets.add(bullet);
+        } else {
+            List<Bullet> bullets = this.getBullets();
+            if (bullets == null) {
+                bullets = new Vector<>();
+                this.setBullets(bullets);
+            }
+            bullets.add(bullet);
         }
-        bullets.add(bullet);
         // 放入一个线程中
         Feature.bulletsThread.execute(bullet);
     }

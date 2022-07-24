@@ -20,7 +20,10 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
     Hero hero = null;
     // 敌人的坦克
     List<Enemy> enemies = new Vector();
+    // 敌人坦克的所有子弹都放在这里
+    public static List<Bullet> enemyBullets = new Vector<>();
     int enemySize = 3;
+
     List<Bomb> bombs = new Vector<>();
 
     Image image1, image2, image3;
@@ -138,6 +141,7 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
 
     /**
      * 画出某一个坦克对应的所有子弹
+     *
      * @param t
      * @param g
      */
@@ -166,23 +170,32 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
 
     /**
      * 键盘按压事件
+     *
      * @param e
      */
     @Override
     public void keyPressed(KeyEvent e) {
         char keyCode = (char) e.getKeyCode();
         if (keyCode == KeyEvent.VK_W || keyCode == KeyEvent.VK_UP) {
-            hero.setDirect(Direct.up);
-            hero.moveUp();
+            if (hero.getY() > 0) {
+                hero.setDirect(Direct.up);
+                hero.moveUp();
+            }
         } else if (keyCode == KeyEvent.VK_S || keyCode == KeyEvent.VK_DOWN) {
-            hero.setDirect(Direct.down);
-            hero.moveDown();
+            if (hero.getY() < 750 - 60) {
+                hero.setDirect(Direct.down);
+                hero.moveDown();
+            }
         } else if (keyCode == KeyEvent.VK_A || keyCode == KeyEvent.VK_LEFT) {
-            hero.setDirect(Direct.left);
-            hero.moveLeft();
+            if (hero.getX() > 0) {
+                hero.setDirect(Direct.left);
+                hero.moveLeft();
+            }
         } else if (keyCode == KeyEvent.VK_D || keyCode == KeyEvent.VK_RIGHT) {
-            hero.setDirect(Direct.right);
-            hero.moveRight();
+            if (hero.getX() < 1000 - 60) {
+                hero.setDirect(Direct.right);
+                hero.moveRight();
+            }
         }
         // 发弹
         if (keyCode == KeyEvent.VK_J) {
@@ -218,19 +231,33 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
      */
     private void hit() {
         Hero hero = this.getHero();
+        // 我方子弹
+        List<Bullet> heroBullets = null;
         if (hero != null) {
             // 判断每颗子弹是否在范围内
-            List<Bullet> bullets = hero.getBullets();
-            if (bullets == null || bullets.size() == 0) {
-                return;
-            }
-            for (Bullet bullet : bullets) {
-                if (bullet != null && bullet.isAlive()) {
-                    List<Enemy> enemies = this.getEnemies();
-                    for (Enemy enemy : enemies) {
-                        doHit(bullet, enemy);
+            heroBullets = hero.getBullets();
+        }
+
+        // 敌方子弹
+        List<Bullet> enemyBullets = new Vector<>();
+        List<Enemy> enemies = this.getEnemies();
+        if (enemies != null && enemies.size() > 0) {
+            for (Enemy enemy : enemies) {
+                // 判断敌人子弹是否击中我方坦克
+                List<Bullet> tempBullets = enemy.getBullets();
+                if (tempBullets != null) {
+                    enemyBullets.addAll(tempBullets);
+                }
+                if (heroBullets != null && heroBullets.size() > 0) {
+                    for (Bullet heroBullet : heroBullets) {
+                        doHit(heroBullet, enemy);
                     }
                 }
+            }
+        }
+        if (enemyBullets.size() > 0) {
+            for (Bullet enemyBullet : enemyBullets) {
+                doHit(enemyBullet, hero);
             }
         }
     }
@@ -247,7 +274,7 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
                     tank.setAlive(false);
                     bullet.setAlive(false);
                     // 击中之后创造一个爆炸对象
-                    bombs.add(new Bomb(tank.getX(),tank.getY()));
+                    bombs.add(new Bomb(tank.getX(), tank.getY()));
                 }
                 break;
             case left:
@@ -257,7 +284,7 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
                     tank.setAlive(false);
                     bullet.setAlive(false);
                     // 击中之后创造一个爆炸对象
-                    bombs.add(new Bomb(tank.getX(),tank.getY()));
+                    bombs.add(new Bomb(tank.getX(), tank.getY()));
                 }
                 break;
             default:
